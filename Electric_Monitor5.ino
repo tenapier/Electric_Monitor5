@@ -2,6 +2,7 @@
 // This code is for the First Set and Second Set of Solar Panels giving voltage, current and power output.
 // This is a combination of Electric_Monitor3_v2 and Electric_Monitor4 with code for two ADS1115s and one ESP32.
 // Each ADS1115 needs identification and specific call variables to read all the analog inputs needed.
+// Version tracking with Git and GitHub 4/25/22
 
 
 #include <Adafruit_ADS1X15.h>
