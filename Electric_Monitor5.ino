@@ -275,11 +275,19 @@ void loop() {
    power4 = power2 + power3;             // Total Solar Power
    //power = abs(power);
 
-   if (Vin > 26.0){
-    digitalWrite(Relay2, LOW);
-    Serial.print("Relay2 is now Off"); }
-   else {
-    if (Vin < 25.0) {
+   if (Relay2 == LOW && Vin > 26.2) {     // This is second tier automation for voltage control to the battery
+    digitalWrite(Relay, LOW); }           // PV1 will shut-down if battery voltage remains above 26.2 when PV2 is off
+   else {                                 // PV1 will go back ON first when battery voltage drops below 25.3
+    if (Relay2 == LOW && Vin < 25.3) {
+     digitalWrite(Relay, HIGH); 
+    }
+   }
+
+   if (Vin > 26.19){                      // This is first tier automation for voltage control to the battery
+    digitalWrite(Relay2, LOW);            // PV2 will shut-down if battery voltage goes to 26.2 or higher
+    Serial.print("Relay2 is now Off"); }  // PV2 will go back ON when battery voltage drops below 24.85
+   else {                                 // PV2 will not go back ON until PV1 is ON from a higher voltage (25.29 V) trigger
+    if (Vin < 24.85) {
     digitalWrite(Relay2, HIGH);
    }
    }
