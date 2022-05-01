@@ -54,12 +54,15 @@ float power;
 float power2;
 float power3;
 float power4;
+bool manual1;
+bool manual2;
 
 unsigned long millisNow = 0;  // for delay purposes
 unsigned int sendDelay = 10000;  // delay before sending info via MQTT
 
 const int Relay = 18;
 const int Relay2 = 19;
+
 
 void callback(String topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
@@ -78,10 +81,12 @@ if(String(topic)== mqttRelay){
   if(messageTemp == "on"){
     digitalWrite(Relay, HIGH);
     Serial.print("On");
+    manual1 = 1;
   }
   else if(messageTemp == "off"){
     digitalWrite(Relay, LOW);
     Serial.print("Off");
+    manual1 = 0;
   }
 }
 Serial.println();
@@ -100,10 +105,12 @@ if(String(topic)== mqttRelay2){
   if(messageTemp2 == "on"){
     digitalWrite(Relay2, HIGH);
     Serial.print("On");
+    manual2 = 1;
   }
   else if(messageTemp2 == "off"){
     digitalWrite(Relay2, LOW);
     Serial.print("Off");
+    manual2 = 0;
   }
 }
 Serial.println();
@@ -141,6 +148,11 @@ void setup()
 
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+
+  digitalWrite(Relay, HIGH);
+  digitalWrite(Relay2, HIGH);
+  manual1 = 1;
+  manual2 = 1;
   
 
   // The ADC input range (or gain) can be changed via the following
@@ -275,20 +287,20 @@ void loop() {
    power4 = power2 + power3;             // Total Solar Power
    //power = abs(power);
 
-   if (Relay2 == LOW && Vin > 26.2) {     // This is second tier automation for voltage control to the battery
-    digitalWrite(Relay, LOW); }           // PV1 will shut-down if battery voltage remains above 26.2 when PV2 is off
-   else {                                 // PV1 will go back ON first when battery voltage drops below 25.3
-    if (Relay2 == LOW && Vin < 25.3) {
-     digitalWrite(Relay, HIGH); 
+   if (Relay2 == LOW && Vin > 26.2) {                          // This is second tier automation for voltage control to the battery
+    digitalWrite(Relay, LOW); }                                // PV1 will shut-down if battery voltage remains above 26.2 when PV2 is off
+   else {                                                      // PV1 will go back ON first when battery voltage drops below 25.3
+    if ((Relay2 == LOW) && (Vin < 25.3) && (manual1 == 1)) {   // manual1 needs to be ON for Relay to go back on, manual1 as a means of control 
+     digitalWrite(Relay, HIGH);                                // for PV1 input
     }
    }
 
-   if (Vin > 26.19){                      // This is first tier automation for voltage control to the battery
-    digitalWrite(Relay2, LOW);            // PV2 will shut-down if battery voltage goes to 26.2 or higher
-    Serial.print("Relay2 is now Off"); }  // PV2 will go back ON when battery voltage drops below 24.85
-   else {                                 // PV2 will not go back ON until PV1 is ON from a higher voltage (25.29 V) trigger
-    if (Vin < 24.85) {
-    digitalWrite(Relay2, HIGH);
+   if (Vin > 26.19){                                        // This is first tier automation for voltage control to the battery
+    digitalWrite(Relay2, LOW);                              // PV2 will shut-down if battery voltage goes to 26.2 or higher
+    Serial.print("Relay2 is now Off"); }                    // PV2 will go back ON when battery voltage drops below 24.85
+   else {                                                   // PV2 will not go back ON until PV1 is ON from a higher voltage (25.29 V) trigger
+    if ((Vin < 24.85) && (manual2 == 1)) {                  // manual2 needs to be ON for Relay2 to go back on, manual2 as a means of control
+    digitalWrite(Relay2, HIGH);                             // for PV2 input
    }
    }
 
