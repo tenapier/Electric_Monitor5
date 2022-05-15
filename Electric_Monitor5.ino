@@ -287,7 +287,7 @@ void loop() {
    power4 = power2 + power3;             // Total Solar Power
    //power = abs(power);
 
-   if (Relay2 == LOW && Vin > 26.2) {                          // This is second tier automation for voltage control to the battery
+   if ((Relay2 == LOW) && (Vin > 26.2)) {                      // This is second tier automation for voltage control to the battery
     digitalWrite(Relay, LOW); }                                // PV1 will shut-down if battery voltage remains above 26.2 when PV2 is off
    else {                                                      // PV1 will go back ON first when battery voltage drops below 25.3
     if ((Relay2 == LOW) && (Vin < 25.3) && (manual1 == 1)) {   // manual1 needs to be ON for Relay to go back on, manual1 as a means of control 
